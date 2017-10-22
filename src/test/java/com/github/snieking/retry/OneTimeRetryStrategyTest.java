@@ -48,7 +48,7 @@ public class OneTimeRetryStrategyTest {
         assertEquals(getHelloMessage(), msg.get());
     }
 
-    public String getHelloMessage() {
+    private String getHelloMessage() {
         return "Hello";
     }
 }
