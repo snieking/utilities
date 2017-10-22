@@ -16,21 +16,23 @@ import java.util.function.Supplier;
  *
  * @author Viktor Plane
  */
-public final class OneTimeRetry implements Retryer {
+public final class OneTimeRetryStrategy implements RetryStrategy {
 
-    private static final Logger LOG = LoggerFactory.getLogger(OneTimeRetry.class);
+    private static final String FAILED_TASK = "Failed with the task, performing a retry.";
+
+    private static final Logger LOG = LoggerFactory.getLogger(OneTimeRetryStrategy.class);
     private static final String BAD_DURATION = "Duration can't be null";
-    private static Map<Class<Exception>, Object> ignorableExceptions;
+    private static Map<Class, Object> ignorableExceptions;
 
     private Duration durationBeforeNextRetry;
 
-    private OneTimeRetry(final Duration duration) {
+    private OneTimeRetryStrategy(final Duration duration) {
         this.durationBeforeNextRetry = duration;
         ignorableExceptions = new HashMap<>();
     }
 
     @Override
-    public OneTimeRetry nonRetryExceptions(final Class... exceptions) {
+    public OneTimeRetryStrategy nonRetryExceptions(final Class... exceptions) {
         ignorableExceptions = new HashMap<>();
         for (Class e : exceptions) {
             ignorableExceptions.put(e, null);
@@ -44,6 +46,7 @@ public final class OneTimeRetry implements Retryer {
             try {
                 runnable.run();
             } catch (RuntimeException e) {
+                LOG.info(FAILED_TASK);
                 if (!ignorableExceptions.containsKey(e.getClass())) {
                     TimeManager.waitUntilDurationPassed(durationBeforeNextRetry);
                     runnable.run();
@@ -53,11 +56,12 @@ public final class OneTimeRetry implements Retryer {
     }
 
     @Override
-    public Optional performAndGet(final Supplier task) throws RuntimeException {
+    public <T> Optional<T> performAndGet(final Supplier<T> task) throws RuntimeException {
         if (Optional.ofNullable(task).isPresent()) {
             try {
                 return Optional.ofNullable(task.get());
             } catch (RuntimeException e) {
+                LOG.info(FAILED_TASK);
                 if (!ignorableExceptions.containsKey(e.getClass())) {
                     TimeManager.waitUntilDurationPassed(durationBeforeNextRetry);
                     return Optional.ofNullable(task.get());
@@ -69,18 +73,18 @@ public final class OneTimeRetry implements Retryer {
     }
 
     /**
-     * Creates a new OneTimeRetry instance with a default {@link java.time.Duration} of 0 milliseconds before retrying.
+     * Creates a new OneTimeRetryStrategy instance with a default {@link java.time.Duration} of 0 milliseconds before retrying.
      */
-    public static OneTimeRetry create() {
-        return new OneTimeRetry(Duration.ZERO);
+    public static OneTimeRetryStrategy createRetryStrategy() {
+        return new OneTimeRetryStrategy(Duration.ZERO);
     }
 
     /**
-     * Creates a new OneTimeRetry instance with a provided {@link java.time.Duration} to wait before the next retry.
+     * Creates a new OneTimeRetryStrategy instance with a provided {@link java.time.Duration} to wait before the next retry.
      */
-    public static OneTimeRetry create(final Duration durationBeforeNextRetry) {
+    public static OneTimeRetryStrategy createRetryStrategy(final Duration durationBeforeNextRetry) {
         SanityChecker.verifyNoObjectIsNull(BAD_DURATION, durationBeforeNextRetry);
-        return new OneTimeRetry(durationBeforeNextRetry);
+        return new OneTimeRetryStrategy(durationBeforeNextRetry);
     }
 
 }

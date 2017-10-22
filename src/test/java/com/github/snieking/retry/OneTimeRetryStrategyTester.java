@@ -5,27 +5,27 @@ import org.junit.Test;
 import java.time.Duration;
 import java.util.Optional;
 
+import static com.github.snieking.retry.OneTimeRetryStrategy.createRetryStrategy;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
-public class OneTimeRetryTester {
+public class OneTimeRetryStrategyTester {
 
     @Test
     public void testOneTimeRetry() throws Exception {
-        OneTimeRetry.create(Duration.ofSeconds(5))
+        createRetryStrategy(Duration.ofSeconds(5))
                 .perform(this::printHello);
     }
 
     @Test (expected = IllegalArgumentException.class)
     public void testInvalidDuration() throws Exception {
-        OneTimeRetry.create(null)
+        createRetryStrategy(null)
             .perform(this::printHello);
     }
 
     @Test (expected = RuntimeException.class)
     public void testIgnorableExceptions() throws Exception {
-        final OneTimeRetry retryer = OneTimeRetry.create()
+        final OneTimeRetryStrategy retryer = createRetryStrategy()
                 .nonRetryExceptions(IllegalStateException.class, IllegalArgumentException.class);
 
         retryer.perform(() -> { throw new IllegalStateException(); });
@@ -35,14 +35,13 @@ public class OneTimeRetryTester {
 
     @Test (expected = IllegalStateException.class)
     public void testPermanentException() {
-        OneTimeRetry.create()
+        createRetryStrategy()
                 .perform(() -> { throw new IllegalStateException(); });
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     public void testPerformAndGet() throws Exception {
-        Optional<String> msg = OneTimeRetry.create()
+        Optional<String> msg = createRetryStrategy()
                 .performAndGet(this::getHelloMessage);
 
         assertTrue(msg.isPresent());

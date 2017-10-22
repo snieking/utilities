@@ -1,11 +1,13 @@
 package com.github.snieking.retry;
 
+import static com.github.snieking.retry.ExponentialRetryStrategy.createRetryStrategy;
+
 import org.junit.Test;
 import com.github.snieking.util.Stopwatch;
 
 import static org.junit.Assert.assertTrue;
 
-public class ExponentialRetryerTester extends RetryTester {
+public class ExponentialRetryStrategyTester {
 
     @Test
     public void testDefaultExponentialRetryer() {
@@ -14,7 +16,7 @@ public class ExponentialRetryerTester extends RetryTester {
 
         final Stopwatch timer = Stopwatch.start();
         try {
-            ExponentialRetryer.create(maxExponent, base)
+            createRetryStrategy(maxExponent, base)
                     .perform(() -> {
                         throw new IllegalStateException();
                     });
@@ -31,7 +33,7 @@ public class ExponentialRetryerTester extends RetryTester {
 
         final Stopwatch timer = Stopwatch.start();
         try {
-            ExponentialRetryer.create(maxExponent, base)
+            createRetryStrategy(maxExponent, base)
                     .nonRetryExceptions(IllegalStateException.class)
                     .perform(() -> {
                         throw new IllegalStateException();
@@ -44,7 +46,7 @@ public class ExponentialRetryerTester extends RetryTester {
 
     @Test (expected = IllegalStateException.class)
     public void testPermanentException() {
-        ExponentialRetryer.create(3, 10)
+        createRetryStrategy(3, 10)
                 .perform(() -> { throw new IllegalStateException(); });
     }
 

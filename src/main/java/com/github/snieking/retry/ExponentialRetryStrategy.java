@@ -15,16 +15,16 @@ import java.util.function.Supplier;
  *
  * For example, if base is 10ms and maxExponent is 5, it will perform retries after 10, 100, 1000 & 100000 milliseconds.
  */
-public final class ExponentialRetryer implements Retryer {
+public final class ExponentialRetryStrategy implements RetryStrategy {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ExponentialRetryer.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ExponentialRetryStrategy.class);
 
     private int maxExponent;
     private long base;
     private int exponent;
-    private Map<Class<Exception>, Object> ignorableExceptions;
+    private Map<Class, Object> ignorableExceptions;
 
-    private ExponentialRetryer(final int maxExponent, final long base) {
+    private ExponentialRetryStrategy(final int maxExponent, final long base) {
         this.maxExponent = maxExponent;
         this.exponent = 0;
         this.base = base;
@@ -32,9 +32,9 @@ public final class ExponentialRetryer implements Retryer {
     }
 
     @Override
-    public ExponentialRetryer nonRetryExceptions(Class... exceptions) {
+    public ExponentialRetryStrategy nonRetryExceptions(Class... exceptions) {
         ignorableExceptions = new HashMap<>();
-        for (Class<Exception> exception : exceptions) {
+        for (Class exception : exceptions) {
             ignorableExceptions.put(exception, null);
         }
         return this;
@@ -73,7 +73,7 @@ public final class ExponentialRetryer implements Retryer {
     }
 
     @Override
-    public Optional performAndGet(final Supplier task) throws RuntimeException {
+    public <T> Optional<T> performAndGet(final Supplier<T> task) throws RuntimeException {
         RuntimeException exception = null;
         boolean latestFailed = false;
         if (task != null) {
@@ -107,29 +107,29 @@ public final class ExponentialRetryer implements Retryer {
     /**
      * Creates a ExpontentialRetryer with a default max exponent of 4, and a default base of 10 milliseconds.
      */
-    public static ExponentialRetryer create() {
-        return new ExponentialRetryer(4, 10);
+    public static ExponentialRetryStrategy createRetryStrategy() {
+        return new ExponentialRetryStrategy(4, 10);
     }
 
     /**
-     * Creates a ExponentialRetryer with a provided max exponent, and a default base of 10 milliseconds.
+     * Creates a ExponentialRetryStrategy with a provided max exponent, and a default base of 10 milliseconds.
      */
-    public static ExponentialRetryer create(final int maxExponent) {
-        return new ExponentialRetryer(maxExponent, 10);
+    public static ExponentialRetryStrategy createRetryStrategy(final int maxExponent) {
+        return new ExponentialRetryStrategy(maxExponent, 10);
     }
 
     /**
-     * Creates an ExponentialRetryer with a default max exponent of 4, and a base of a provided milliseconds.
+     * Creates an ExponentialRetryStrategy with a default max exponent of 4, and a base of a provided milliseconds.
      */
-    public static ExponentialRetryer create(final long base) {
-        return new ExponentialRetryer(4, base);
+    public static ExponentialRetryStrategy createRetryStrategy(final long base) {
+        return new ExponentialRetryStrategy(4, base);
     }
 
     /**
-     * Creates an ExponentialRetryer with a provided max exponent, and a base of a provided milliseconds.
+     * Creates an ExponentialRetryStrategy with a provided max exponent, and a base of a provided milliseconds.
      */
-    public static ExponentialRetryer create(final int maxExponent, long base) {
-        return new ExponentialRetryer(maxExponent, base);
+    public static ExponentialRetryStrategy createRetryStrategy(final int maxExponent, long base) {
+        return new ExponentialRetryStrategy(maxExponent, base);
     }
 
 }
