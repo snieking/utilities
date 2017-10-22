@@ -32,7 +32,7 @@ public class ExponentialRetryerTester extends RetryTester {
         final Stopwatch timer = Stopwatch.start();
         try {
             ExponentialRetryer.create(maxExponent, base)
-                    .ignoreExceptions(IllegalStateException.class)
+                    .nonRetryExceptions(IllegalStateException.class)
                     .perform(() -> {
                         throw new IllegalStateException();
                     });
@@ -40,6 +40,12 @@ public class ExponentialRetryerTester extends RetryTester {
             assertTrue(timer.stop().getTimeInSeconds() < getSecondsFromBaseAndExponent(base, maxExponent));
             throw e;
         }
+    }
+
+    @Test (expected = IllegalStateException.class)
+    public void testPermanentException() {
+        ExponentialRetryer.create(3, 10)
+                .perform(() -> { throw new IllegalStateException(); });
     }
 
     private int getSecondsFromBaseAndExponent(final long base, final int maxExponent) {

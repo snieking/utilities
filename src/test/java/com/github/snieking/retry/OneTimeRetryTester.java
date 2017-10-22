@@ -26,11 +26,17 @@ public class OneTimeRetryTester {
     @Test (expected = RuntimeException.class)
     public void testIgnorableExceptions() throws Exception {
         final OneTimeRetry retryer = OneTimeRetry.create()
-                .ignoreExceptions(IllegalStateException.class, IllegalArgumentException.class);
+                .nonRetryExceptions(IllegalStateException.class, IllegalArgumentException.class);
 
         retryer.perform(() -> { throw new IllegalStateException(); });
         retryer.perform(() -> { throw new IllegalArgumentException(); });
         retryer.perform(() -> { throw new RuntimeException(); });
+    }
+
+    @Test (expected = IllegalStateException.class)
+    public void testPermanentException() {
+        OneTimeRetry.create()
+                .perform(() -> { throw new IllegalStateException(); });
     }
 
     @Test

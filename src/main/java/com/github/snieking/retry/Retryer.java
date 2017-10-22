@@ -13,7 +13,7 @@ public interface Retryer<T, R> {
     /**
      * Skip retry if one of the provided exceptions occur.
      */
-    Object ignoreExceptions(Class<Exception>... exceptions);
+    Object nonRetryExceptions(Class<Exception>... exceptions);
 
     /**
      * Performs (and retries) a runnable task. Does not return anything.

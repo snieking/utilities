@@ -30,7 +30,7 @@ public final class OneTimeRetry implements Retryer {
     }
 
     @Override
-    public OneTimeRetry ignoreExceptions(final Class... exceptions) {
+    public OneTimeRetry nonRetryExceptions(final Class... exceptions) {
         ignorableExceptions = new HashMap<>();
         for (Class e : exceptions) {
             ignorableExceptions.put(e, null);
