@@ -18,11 +18,11 @@ public interface Retryer<T, R> {
     /**
      * Performs (and retries) a runnable task. Does not return anything.
      */
-    void perform(final Runnable task) throws Exception;
+    void perform(final Runnable task) throws RuntimeException;
 
     /**
      * Performs (and retries if failed) a supplied task and returns the result.
      */
-    <T> Optional<T> performAndGet(final Supplier<T> task) throws Exception;
+    <T> Optional<T> performAndGet(final Supplier<T> task) throws RuntimeException;
 
 }

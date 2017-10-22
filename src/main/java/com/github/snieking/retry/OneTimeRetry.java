@@ -39,11 +39,11 @@ public final class OneTimeRetry implements Retryer {
     }
 
     @Override
-    public void perform(final Runnable task) throws Exception {
+    public void perform(final Runnable task) throws RuntimeException {
         Optional.ofNullable(task).ifPresent(runnable -> {
             try {
                 runnable.run();
-            } catch (Exception e) {
+            } catch (RuntimeException e) {
                 if (!ignorableExceptions.containsKey(e.getClass())) {
                     TimeManager.waitUntilDurationPassed(durationBeforeNextRetry);
                     runnable.run();
@@ -53,11 +53,11 @@ public final class OneTimeRetry implements Retryer {
     }
 
     @Override
-    public Optional performAndGet(final Supplier task) throws Exception {
+    public Optional performAndGet(final Supplier task) throws RuntimeException {
         if (Optional.ofNullable(task).isPresent()) {
             try {
                 return Optional.ofNullable(task.get());
-            } catch (Exception e) {
+            } catch (RuntimeException e) {
                 if (!ignorableExceptions.containsKey(e.getClass())) {
                     TimeManager.waitUntilDurationPassed(durationBeforeNextRetry);
                     return Optional.ofNullable(task.get());

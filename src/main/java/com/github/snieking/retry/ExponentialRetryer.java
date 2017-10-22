@@ -26,13 +26,13 @@ public final class ExponentialRetryer implements Retryer {
 
     private ExponentialRetryer(final int maxExponent, final long base) {
         this.maxExponent = maxExponent;
-        this.exponent = 1;
+        this.exponent = 0;
         this.base = base;
         this.ignorableExceptions = new HashMap<>();
     }
 
     @Override
-    public ExponentialRetryer ignoreExceptions(Class[] exceptions) {
+    public ExponentialRetryer ignoreExceptions(Class... exceptions) {
         ignorableExceptions = new HashMap<>();
         for (Class<Exception> exception : exceptions) {
             ignorableExceptions.put(exception, null);
@@ -41,24 +41,26 @@ public final class ExponentialRetryer implements Retryer {
     }
 
     @Override
-    public void perform(final Runnable task) throws Exception {
-        Exception exception = null;
+    public void perform(final Runnable task) throws RuntimeException {
+        RuntimeException exception = null;
 
         if (task != null) {
-            while (exponent < maxExponent) {
+            while (exponent <= maxExponent) {
                 try {
                     task.run();
                     return;
-                } catch (Exception e) {
+                } catch (RuntimeException e) {
 
                     if (exception != null) {
                         exception.addSuppressed(e);
                     } else {
                         exception = e;
                     }
-
+                    exponent++;
                     if (!ignorableExceptions.containsKey(e.getClass())) {
                         TimeManager.waitUntilDurationPassed(Duration.ofMillis((long) Math.pow(base, exponent++)));
+                    } else {
+                        break;
                     }
                 }
             }
@@ -71,23 +73,25 @@ public final class ExponentialRetryer implements Retryer {
     }
 
     @Override
-    public Optional performAndGet(final Supplier task) throws Exception {
-        Exception exception = null;
+    public Optional performAndGet(final Supplier task) throws RuntimeException {
+        RuntimeException exception = null;
         boolean latestFailed = false;
         if (task != null) {
             while (exponent <= maxExponent) {
                 try {
                     return Optional.ofNullable(task.get());
-                } catch (Exception e) {
+                } catch (RuntimeException e) {
 
                     if (exception != null) {
                         exception.addSuppressed(e);
                     } else {
                         exception = e;
                     }
-
+                    exponent++;
                     if (!ignorableExceptions.containsKey(e.getClass())) {
                         TimeManager.waitUntilDurationPassed(Duration.ofMillis((long) Math.pow(base, exponent++)));
+                    } else {
+                        break;
                     }
                 }
             }
@@ -110,15 +114,22 @@ public final class ExponentialRetryer implements Retryer {
     /**
      * Creates a ExponentialRetryer with a provided max exponent, and a default base of 10 milliseconds.
      */
-    public static ExponentialRetryer create(int maxExponent) {
+    public static ExponentialRetryer create(final int maxExponent) {
         return new ExponentialRetryer(maxExponent, 10);
     }
 
     /**
      * Creates an ExponentialRetryer with a default max exponent of 4, and a base of a provided milliseconds.
      */
-    public static ExponentialRetryer create(long base) {
+    public static ExponentialRetryer create(final long base) {
         return new ExponentialRetryer(4, base);
+    }
+
+    /**
+     * Creates an ExponentialRetryer with a provided max exponent, and a base of a provided milliseconds.
+     */
+    public static ExponentialRetryer create(final int maxExponent, long base) {
+        return new ExponentialRetryer(maxExponent, base);
     }
 
 }

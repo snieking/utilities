@@ -9,16 +9,41 @@ public class ExponentialRetryerTester extends RetryTester {
 
     @Test
     public void testDefaultExponentialRetryer() {
+        long base = 10;
+        int maxExponent = 4;
+
         final Stopwatch timer = Stopwatch.start();
         try {
-            ExponentialRetryer.create()
+            ExponentialRetryer.create(maxExponent, base)
                     .perform(() -> {
                         throw new IllegalStateException();
                     });
         } catch (Exception e) {
             final long time = timer.stop().getTimeInSeconds();
-            assertTrue(time > 10);
-            e.printStackTrace();
+            assertTrue(time > getSecondsFromBaseAndExponent(base, maxExponent));
         }
+    }
+
+    @Test (expected = IllegalStateException.class)
+    public void testNonRetryableExceptions() {
+        final long base = 10;
+        final int maxExponent = 4;
+
+        final Stopwatch timer = Stopwatch.start();
+        try {
+            ExponentialRetryer.create(maxExponent, base)
+                    .ignoreExceptions(IllegalStateException.class)
+                    .perform(() -> {
+                        throw new IllegalStateException();
+                    });
+        } catch (IllegalStateException e) {
+            assertTrue(timer.stop().getTimeInSeconds() < getSecondsFromBaseAndExponent(base, maxExponent));
+            throw e;
+        }
+    }
+
+    private int getSecondsFromBaseAndExponent(final long base, final int maxExponent) {
+        int seconds = (int) Math.pow(base, maxExponent) / 1000;
+        return seconds;
     }
 }
