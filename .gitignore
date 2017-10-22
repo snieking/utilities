@@ -1,10 +1,21 @@
-# IDEA
-.idea
+# Eclipse
+.classpath
+.project
+.settings/
+
+# IntelliJ
+.idea/
+*.iml
+*.iws
 
 # Java
 *.class
 
+# Mac
+.DS_Store
+
 # Maven
+log/
 target/
 pom.xml.tag
 pom.xml.releaseBackup
