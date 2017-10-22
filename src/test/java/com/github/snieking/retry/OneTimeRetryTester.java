@@ -40,6 +40,7 @@ public class OneTimeRetryTester {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void testPerformAndGet() throws Exception {
         Optional<String> msg = OneTimeRetry.create()
                 .performAndGet(this::getHelloMessage);

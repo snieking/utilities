@@ -8,7 +8,7 @@ import java.util.function.Supplier;
  *
  * @author Viktor Plane
  */
-public interface Retryer<T, R> {
+public interface Retryer {
 
     /**
      * Skip retry if one of the provided exceptions occur.
@@ -23,6 +23,6 @@ public interface Retryer<T, R> {
     /**
      * Performs (and retries if failed) a supplied task and returns the result.
      */
-    <T> Optional<T> performAndGet(final Supplier<T> task) throws RuntimeException;
+    Optional performAndGet(final Supplier task) throws RuntimeException;
 
 }
