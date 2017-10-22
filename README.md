@@ -1,5 +1,15 @@
 # Utilities
+## Installation
+The project is available via maven repositories.
+```xml
+<dependency>
+  <groupId>com.github.snieking</groupId>
+  <artifactId>utilities</artifactId>
+  <version>1.0</version>
+</dependency>
+```
 
+### Usage examples
 ## Retry
 There is different retry strategies available:
 * OneTimeRetryStrategy which performs one retry.
