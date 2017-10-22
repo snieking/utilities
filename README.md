@@ -9,8 +9,8 @@ The project is available via maven repositories.
 </dependency>
 ```
 
-### Usage examples
-## Retry
+## Usage examples
+### Retry
 There is different retry strategies available:
 * OneTimeRetryStrategy which performs one retry.
 * ExponentialRetryStrategy which performs multiple retries with an exponential increase of duration between the attempts.
