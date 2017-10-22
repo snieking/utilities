@@ -13,7 +13,7 @@ import java.util.function.Supplier;
 /**
  * Performs an exponential retry strategy.
  *
- * For example, if base is 10ms and maxExponent is 5, it will perform retries after 10, 100, 1000 & 100000 milliseconds.
+ * For example, if base is 10ms and maxExponent is 5, it will perform retries after 10, 100, 1000 and 100000 milliseconds.
  */
 public final class ExponentialRetryStrategy implements RetryStrategy {
 
@@ -106,6 +106,8 @@ public final class ExponentialRetryStrategy implements RetryStrategy {
 
     /**
      * Creates a ExpontentialRetryer with a default max exponent of 4, and a default base of 10 milliseconds.
+     *
+     * @return {@link ExponentialRetryStrategy}
      */
     public static ExponentialRetryStrategy createRetryStrategy() {
         return new ExponentialRetryStrategy(4, 10);
@@ -113,6 +115,9 @@ public final class ExponentialRetryStrategy implements RetryStrategy {
 
     /**
      * Creates a ExponentialRetryStrategy with a provided max exponent, and a default base of 10 milliseconds.
+     *
+     * @param maxExponent the max exponent before giving up
+     * @return {@link ExponentialRetryStrategy}
      */
     public static ExponentialRetryStrategy createRetryStrategy(final int maxExponent) {
         return new ExponentialRetryStrategy(maxExponent, 10);
@@ -120,6 +125,9 @@ public final class ExponentialRetryStrategy implements RetryStrategy {
 
     /**
      * Creates an ExponentialRetryStrategy with a default max exponent of 4, and a base of a provided milliseconds.
+     *
+     * @param base the base that should be used.
+     * @return {@link ExponentialRetryStrategy}
      */
     public static ExponentialRetryStrategy createRetryStrategy(final long base) {
         return new ExponentialRetryStrategy(4, base);
@@ -127,6 +135,10 @@ public final class ExponentialRetryStrategy implements RetryStrategy {
 
     /**
      * Creates an ExponentialRetryStrategy with a provided max exponent, and a base of a provided milliseconds.
+     *
+     * @param maxExponent the max exponent before giving up
+     * @param base the base that should be used.
+     * @return {@link ExponentialRetryStrategy}
      */
     public static ExponentialRetryStrategy createRetryStrategy(final int maxExponent, long base) {
         return new ExponentialRetryStrategy(maxExponent, base);

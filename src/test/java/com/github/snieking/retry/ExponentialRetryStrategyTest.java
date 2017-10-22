@@ -12,7 +12,7 @@ public class ExponentialRetryStrategyTest {
     @Test
     public void testDefaultExponentialRetryer() {
         long base = 10;
-        int maxExponent = 4;
+        int maxExponent = 3;
 
         final Stopwatch timer = Stopwatch.start();
         try {
@@ -22,14 +22,14 @@ public class ExponentialRetryStrategyTest {
                     });
         } catch (Exception e) {
             final long time = timer.stop().getTimeInSeconds();
-            assertTrue(time > getSecondsFromBaseAndExponent(base, maxExponent));
+            assertTrue(time >= getSecondsFromBaseAndExponent(base, maxExponent));
         }
     }
 
     @Test (expected = IllegalStateException.class)
     public void testNonRetryableExceptions() {
         final long base = 10;
-        final int maxExponent = 4;
+        final int maxExponent = 3;
 
         final Stopwatch timer = Stopwatch.start();
         try {

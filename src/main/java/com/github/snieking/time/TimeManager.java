@@ -19,6 +19,10 @@ public class TimeManager {
 
     /**
      * Checks if the duration has passed since the provided duration.
+     *
+     * @param timestamp the timestamp to check on if the duration has passed.
+     * @param duration the duration to check if it has passed from the provided timestamp.
+     * @return boolean if the duration has passed or not.
      */
     public static boolean isDurationPassed(final Instant timestamp, final Duration duration) {
         SanityChecker.verifyNoObjectIsNull(BAD_TIME, timestamp, duration);
@@ -27,6 +31,8 @@ public class TimeManager {
 
     /**
      * Waits for the provided duration to pass.
+     *
+     * @param duration the time the thread should wait for to pass.
      */
     public static void waitUntilDurationPassed(final Duration duration) {
         SanityChecker.verifyNoObjectIsNull(BAD_TIME, duration);
@@ -35,6 +41,8 @@ public class TimeManager {
 
     /**
      * Sleeps for the provided milliseconds.
+     *
+     * @param millis the milliseconds the thread should sleep for.
      */
     public static void sleep(final long millis) {
         try {

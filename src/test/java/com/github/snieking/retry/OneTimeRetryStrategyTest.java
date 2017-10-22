@@ -11,16 +11,16 @@ import static org.junit.Assert.assertEquals;
 
 public class OneTimeRetryStrategyTest {
 
-    @Test
+    @Test (expected =  RuntimeException.class)
     public void testOneTimeRetry() throws Exception {
         createRetryStrategy(Duration.ofSeconds(5))
-                .perform(this::printHello);
+                .perform(() -> { throw new RuntimeException(); });
     }
 
     @Test (expected = IllegalArgumentException.class)
     public void testInvalidDuration() throws Exception {
         createRetryStrategy(null)
-            .perform(this::printHello);
+            .perform(() -> { throw new RuntimeException(); });
     }
 
     @Test (expected = RuntimeException.class)
@@ -46,15 +46,6 @@ public class OneTimeRetryStrategyTest {
 
         assertTrue(msg.isPresent());
         assertEquals(getHelloMessage(), msg.get());
-    }
-
-    public void printHello() throws RuntimeException {
-        if (Math.random() < 0.50) {
-            System.out.println("Failed!");
-            throw new RuntimeException();
-        } else {
-            System.out.println("Success!");
-        }
     }
 
     public String getHelloMessage() {
