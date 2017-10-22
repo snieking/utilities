@@ -28,6 +28,7 @@ public final class ExponentialRetryer implements Retryer {
 
     @Override
     public ExponentialRetryer ignoreExceptions(Class[] exceptions) {
+        ignorableExceptions = new HashMap<>();
         for (Class<Exception> exception : exceptions) {
             ignorableExceptions.put(exception, null);
         }
