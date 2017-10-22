@@ -10,6 +10,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+/**
+ * Performs an exponential retry strategy.
+ *
+ * For example, if base is 10ms and maxExponent is 5, it will perform retries after 10, 100, 1000 & 100000 milliseconds.
+ */
 public final class ExponentialRetryer implements Retryer {
 
     private static final Logger LOG = LoggerFactory.getLogger(ExponentialRetryer.class);
@@ -70,7 +75,7 @@ public final class ExponentialRetryer implements Retryer {
         Exception exception = null;
         boolean latestFailed = false;
         if (task != null) {
-            while (exponent < maxExponent) {
+            while (exponent <= maxExponent) {
                 try {
                     return Optional.ofNullable(task.get());
                 } catch (Exception e) {
@@ -96,10 +101,10 @@ public final class ExponentialRetryer implements Retryer {
     }
 
     /**
-     * Creates a ExpontentialRetryer with a default max exponent of 5, and a default base of 10 milliseconds.
+     * Creates a ExpontentialRetryer with a default max exponent of 4, and a default base of 10 milliseconds.
      */
     public static ExponentialRetryer create() {
-        return new ExponentialRetryer(5, 10);
+        return new ExponentialRetryer(4, 10);
     }
 
     /**
@@ -110,10 +115,10 @@ public final class ExponentialRetryer implements Retryer {
     }
 
     /**
-     * Creates an ExponentialRetryer with a default max exponent of 5, and a base of a provided milliseconds.
+     * Creates an ExponentialRetryer with a default max exponent of 4, and a base of a provided milliseconds.
      */
     public static ExponentialRetryer create(long base) {
-        return new ExponentialRetryer(5, base);
+        return new ExponentialRetryer(4, base);
     }
 
 }
