@@ -9,7 +9,7 @@ import static com.github.snieking.retry.OneTimeRetryStrategy.createRetryStrategy
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
 
-public class OneTimeRetryStrategyTester {
+public class OneTimeRetryStrategyTest {
 
     @Test
     public void testOneTimeRetry() throws Exception {

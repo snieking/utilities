@@ -7,7 +7,7 @@ import com.github.snieking.util.Stopwatch;
 
 import static org.junit.Assert.assertTrue;
 
-public class ExponentialRetryStrategyTester {
+public class ExponentialRetryStrategyTest {
 
     @Test
     public void testDefaultExponentialRetryer() {
