@@ -46,8 +46,8 @@ Optional<Person> person = retryStrategy
 
 The interface also makes it possible to specifiy that no retry should be performed on occurance of exceptions in a list.
 ```java
-RetryStrategy oneTimeRetryStrategy = OneTimeRetryStrategy
-                                      .create(Duration.ofSeconds(5))
-                                      .nonRetryExceptions(IllegalStateException.class, 
-                                                          IllegalArgumentException.class);
+OneTimeRetryStrategy
+  .create(Duration.ofSeconds(5))
+  .nonRetryExceptions(IllegalStateException.class, 
+                      IllegalArgumentException.class);
 ```
