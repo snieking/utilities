@@ -72,7 +72,7 @@ public class ExponentialRetryStrategyTest extends BaseRetryStrategyTest {
                 });
 
         Assert.assertFalse(future.isDone());
-        TimeManager.waitUntilDurationPassed(Duration.ofMillis(sleepTime));
+        TimeManager.waitUntilDurationPassed(Duration.ofMillis(sleepTime+50));
         Assert.assertTrue(future.isDone());
     }
 

@@ -92,7 +92,7 @@ public class FibonacciRetryStrategy implements RetryStrategy {
                 try {
                     return Optional.ofNullable(task.get());
                 } catch (RuntimeException e) {
-                    
+
                     if (exception != null) {
                         exception.addSuppressed(e);
                     } else {
