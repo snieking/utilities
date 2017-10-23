@@ -5,7 +5,7 @@ The project is available via maven repositories.
 <dependency>
   <groupId>com.github.snieking</groupId>
   <artifactId>utilities</artifactId>
-  <version>1.0</version>
+  <version>1.1</version>
 </dependency>
 ```
 
