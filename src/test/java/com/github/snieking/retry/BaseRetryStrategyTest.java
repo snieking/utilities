@@ -10,4 +10,12 @@ public class BaseRetryStrategyTest {
     public void setup() {
         numOfFails = 0;
     }
+
+    protected String getMessageButThrowsException() {
+        throw new IllegalStateException();
+    }
+
+    protected String getMessage() {
+        return "Hello";
+    }
 }

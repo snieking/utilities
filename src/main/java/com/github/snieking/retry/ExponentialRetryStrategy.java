@@ -5,9 +5,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 /**
@@ -24,19 +24,19 @@ public final class ExponentialRetryStrategy implements RetryStrategy {
 
     private int maxExponent;
     private long base;
-    private Map<Class, Object> ignorableExceptions;
+    private Map<Class, Object> nonRetryableExceptions;
 
     private ExponentialRetryStrategy(final int maxExponent, final long base) {
         this.maxExponent = maxExponent;
         this.base = base;
-        this.ignorableExceptions = new HashMap<>();
+        this.nonRetryableExceptions = new ConcurrentHashMap<>();
     }
 
     @Override
     public ExponentialRetryStrategy nonRetryExceptions(Class... exceptions) {
-        ignorableExceptions = new HashMap<>();
+        this.nonRetryableExceptions = new ConcurrentHashMap<>();
         for (Class exception : exceptions) {
-            ignorableExceptions.put(exception, null);
+            nonRetryableExceptions.put(exception, Optional.empty());
         }
         return this;
     }
@@ -59,7 +59,7 @@ public final class ExponentialRetryStrategy implements RetryStrategy {
                         exception = e;
                     }
                     exponent++;
-                    if (!ignorableExceptions.containsKey(e.getClass())) {
+                    if (!nonRetryableExceptions.containsKey(e.getClass())) {
                         TimeManager.waitUntilDurationPassed(Duration.ofMillis((long) Math.pow(base, exponent++)));
                     } else {
                         break;
@@ -92,7 +92,7 @@ public final class ExponentialRetryStrategy implements RetryStrategy {
                         exception = e;
                     }
                     exponent++;
-                    if (!ignorableExceptions.containsKey(e.getClass())) {
+                    if (!nonRetryableExceptions.containsKey(e.getClass())) {
                         TimeManager.waitUntilDurationPassed(Duration.ofMillis((long) Math.pow(base, exponent++)));
                     } else {
                         break;

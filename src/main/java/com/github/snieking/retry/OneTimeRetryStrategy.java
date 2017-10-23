@@ -6,9 +6,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 /**
@@ -22,20 +22,20 @@ public final class OneTimeRetryStrategy implements RetryStrategy {
 
     private static final Logger LOG = LoggerFactory.getLogger(OneTimeRetryStrategy.class);
     private static final String BAD_DURATION = "Duration can't be null";
-    private static Map<Class, Object> ignorableExceptions;
+    private static Map<Class, Object> nonRetryableExceptions;
 
     private Duration durationBeforeNextRetry;
 
     private OneTimeRetryStrategy(final Duration duration) {
         this.durationBeforeNextRetry = duration;
-        ignorableExceptions = new HashMap<>();
+        this.nonRetryableExceptions = new ConcurrentHashMap<>();
     }
 
     @Override
     public OneTimeRetryStrategy nonRetryExceptions(final Class... exceptions) {
-        ignorableExceptions = new HashMap<>();
+        this.nonRetryableExceptions = new ConcurrentHashMap<>();
         for (Class e : exceptions) {
-            ignorableExceptions.put(e, null);
+            nonRetryableExceptions.put(e, Optional.empty());
         }
         return this;
     }
@@ -47,7 +47,7 @@ public final class OneTimeRetryStrategy implements RetryStrategy {
                 runnable.run();
             } catch (RuntimeException e) {
                 LOG.info(FAILED_TASK);
-                if (!ignorableExceptions.containsKey(e.getClass())) {
+                if (!nonRetryableExceptions.containsKey(e.getClass())) {
                     TimeManager.waitUntilDurationPassed(durationBeforeNextRetry);
                     runnable.run();
                 }
@@ -62,7 +62,7 @@ public final class OneTimeRetryStrategy implements RetryStrategy {
                 return Optional.ofNullable(task.get());
             } catch (RuntimeException e) {
                 LOG.info(FAILED_TASK);
-                if (!ignorableExceptions.containsKey(e.getClass())) {
+                if (!nonRetryableExceptions.containsKey(e.getClass())) {
                     TimeManager.waitUntilDurationPassed(durationBeforeNextRetry);
                     return Optional.ofNullable(task.get());
                 }

@@ -1,12 +1,23 @@
 package com.github.snieking.retry;
 
+import com.github.snieking.time.TimeManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.time.Duration;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 public class FibonacciRetryStrategy implements RetryStrategy {
 
+    private static final Logger LOG = LoggerFactory.getLogger(FibonacciRetryStrategy.class);
+
     private static final int DEFAULT_MAX_FIB = 10;
     private static final long DEFAULT_OFFSET = 100;
+
+    private Map<Class, Object> nonRetryableExceptions;
 
     private int maxFib;
     private long offset;
@@ -14,21 +25,100 @@ public class FibonacciRetryStrategy implements RetryStrategy {
     private FibonacciRetryStrategy(int maxFib, long offset) {
         this.maxFib = maxFib;
         this.offset = offset;
+        this.nonRetryableExceptions = new ConcurrentHashMap<>();
     }
 
     @Override
-    public Object nonRetryExceptions(Class... exceptions) {
-        return null;
+    public FibonacciRetryStrategy nonRetryExceptions(Class... exceptions) {
+        nonRetryableExceptions = new ConcurrentHashMap<>();
+        for (Class exception : exceptions) {
+            nonRetryableExceptions.put(exception, Optional.empty());
+        }
+
+        return this;
     }
 
     @Override
-    public void perform(Runnable runnable) {
+    public void perform(final Runnable runnable) {
+        if (Optional.ofNullable(runnable).isPresent()) {
+            RuntimeException exception = null;
+            int currentFib = 1;
 
+            long previousOffset = offset;
+            long currentOffset = offset;
+
+            while (currentFib <= maxFib) {
+                try {
+                    runnable.run();
+                    return;
+                } catch (RuntimeException e) {
+
+                    if (exception != null) {
+                        exception.addSuppressed(e);
+                    } else {
+                        exception = e;
+                    }
+
+                    if (!nonRetryableExceptions.containsKey(e.getClass())) {
+                        TimeManager.waitUntilDurationPassed(Duration.ofMillis(currentOffset));
+
+                        long temp = currentOffset;
+                        currentOffset += previousOffset;
+                        previousOffset = temp;
+                    } else {
+                        break;
+                    }
+
+                    currentFib++;
+                }
+            }
+
+            if (exception != null) {
+                throw exception;
+            }
+        }
     }
 
     @Override
-    public <T> Optional<T> performAndGet(Supplier<T> task) {
-        return null;
+    public <T> Optional<T> performAndGet(final Supplier<T> task) {
+        if (Optional.ofNullable(task).isPresent()) {
+            RuntimeException exception = null;
+            int currentFib = 1;
+
+            long previousOffset = offset;
+            long currentOffset = offset;
+
+            while (currentFib <= maxFib) {
+                try {
+                    return Optional.ofNullable(task.get());
+                } catch (RuntimeException e) {
+                    
+                    if (exception != null) {
+                        exception.addSuppressed(e);
+                    } else {
+                        exception = e;
+                    }
+
+                    if (!nonRetryableExceptions.containsKey(e.getClass())) {
+                        TimeManager.waitUntilDurationPassed(Duration.ofMillis(currentOffset));
+
+                        long temp = currentOffset;
+                        currentOffset += previousOffset;
+                        previousOffset = temp;
+                    } else {
+                        break;
+                    }
+
+                    currentFib++;
+                }
+            }
+
+            if (exception != null) {
+                throw exception;
+            }
+        }
+
+        return Optional.empty();
     }
 
     /**
