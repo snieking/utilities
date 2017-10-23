@@ -74,6 +74,8 @@ public final class OneTimeRetryStrategy implements RetryStrategy {
 
     /**
      * Creates a new OneTimeRetryStrategy instance with a default {@link java.time.Duration} of 0 milliseconds before retrying.
+     *
+     * @return {@link OneTimeRetryStrategy} instance.
      */
     public static OneTimeRetryStrategy createRetryStrategy() {
         return new OneTimeRetryStrategy(Duration.ZERO);
@@ -83,7 +85,7 @@ public final class OneTimeRetryStrategy implements RetryStrategy {
      * Creates a new OneTimeRetryStrategy instance with a provided {@link java.time.Duration} to wait before the next retry.
      *
      * @param durationBeforeNextRetry the wait {@link Duration} to wait before retrying.
-     * @return {@link OneTimeRetryStrategy}.
+     * @return {@link OneTimeRetryStrategy} instance.
      */
     public static OneTimeRetryStrategy createRetryStrategy(final Duration durationBeforeNextRetry) {
         SanityChecker.verifyNoObjectIsNull(BAD_DURATION, durationBeforeNextRetry);

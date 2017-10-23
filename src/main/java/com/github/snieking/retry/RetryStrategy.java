@@ -45,7 +45,7 @@ public interface RetryStrategy {
      *
      * @param task the {@link Supplier} that should be tried (and retried).
      * @param <T> the return type.
-     * @return CompletableFuture holding a {@link Optional} by type <T> of the result from the provided {@link Supplier}.
+     * @return CompletableFuture holding a {@link Optional} of the result from the provided {@link Supplier}.
      */
     default <T> CompletableFuture<Optional<T>> performAndGetAsync(final Supplier<T> task) {
         return CompletableFuture.supplyAsync(() -> performAndGet(task));

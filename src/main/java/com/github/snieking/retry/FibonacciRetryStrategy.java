@@ -155,7 +155,7 @@ public class FibonacciRetryStrategy implements RetryStrategy {
      *
      * @param maxFib the maxFib that it will iterate to. Can also be looked at as maxRetries.
      * @param offset decides what the start of fib will be. For example 100: 100 + 100 + 200 + 400.
-     * @return @return {@link FibonacciRetryStrategy} instance.
+     * @return {@link FibonacciRetryStrategy} instance.
      */
     public static FibonacciRetryStrategy createRetryStrategy(int maxFib, long offset) {
         return new FibonacciRetryStrategy(maxFib, offset);
