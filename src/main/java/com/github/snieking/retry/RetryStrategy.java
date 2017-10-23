@@ -28,7 +28,7 @@ public interface RetryStrategy {
      * @param runnable the {@link Runnable} that should be tried (and retried).
      */
     default void performAsync(final Runnable runnable) {
-        new Thread(() -> perform(runnable));
+        new Thread(() -> perform(runnable)).start();
     }
 
     /**
