@@ -19,14 +19,15 @@ public final class ExponentialRetryStrategy implements RetryStrategy {
 
     private static final Logger LOG = LoggerFactory.getLogger(ExponentialRetryStrategy.class);
 
+    private static final long DEFAULT_BASE = 10;
+    private static final int DEFAULT_MAX_EXPONENT = 4;
+
     private int maxExponent;
     private long base;
-    private int exponent;
     private Map<Class, Object> ignorableExceptions;
 
     private ExponentialRetryStrategy(final int maxExponent, final long base) {
         this.maxExponent = maxExponent;
-        this.exponent = 0;
         this.base = base;
         this.ignorableExceptions = new HashMap<>();
     }
@@ -43,8 +44,9 @@ public final class ExponentialRetryStrategy implements RetryStrategy {
     @Override
     public void perform(final Runnable task) throws RuntimeException {
         RuntimeException exception = null;
-
         if (task != null) {
+            int exponent = 0;
+
             while (exponent <= maxExponent) {
                 try {
                     task.run();
@@ -77,6 +79,8 @@ public final class ExponentialRetryStrategy implements RetryStrategy {
         RuntimeException exception = null;
         boolean latestFailed = false;
         if (task != null) {
+            int exponent = 0;
+
             while (exponent <= maxExponent) {
                 try {
                     return Optional.ofNullable(task.get());
@@ -110,7 +114,7 @@ public final class ExponentialRetryStrategy implements RetryStrategy {
      * @return {@link ExponentialRetryStrategy}
      */
     public static ExponentialRetryStrategy createRetryStrategy() {
-        return new ExponentialRetryStrategy(4, 10);
+        return new ExponentialRetryStrategy(DEFAULT_MAX_EXPONENT, DEFAULT_BASE);
     }
 
     /**
@@ -120,7 +124,7 @@ public final class ExponentialRetryStrategy implements RetryStrategy {
      * @return {@link ExponentialRetryStrategy}
      */
     public static ExponentialRetryStrategy createRetryStrategy(final int maxExponent) {
-        return new ExponentialRetryStrategy(maxExponent, 10);
+        return new ExponentialRetryStrategy(maxExponent, DEFAULT_BASE);
     }
 
     /**
@@ -130,7 +134,7 @@ public final class ExponentialRetryStrategy implements RetryStrategy {
      * @return {@link ExponentialRetryStrategy}
      */
     public static ExponentialRetryStrategy createRetryStrategy(final long base) {
-        return new ExponentialRetryStrategy(4, base);
+        return new ExponentialRetryStrategy(DEFAULT_MAX_EXPONENT, base);
     }
 
     /**
