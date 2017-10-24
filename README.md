@@ -5,7 +5,7 @@ The project is available via maven repositories.
 <dependency>
   <groupId>com.github.snieking</groupId>
   <artifactId>utilities</artifactId>
-  <version>1.0</version>
+  <version>1.1</version>
 </dependency>
 ```
 
@@ -14,6 +14,7 @@ The project is available via maven repositories.
 There is different retry strategies available:
 * OneTimeRetryStrategy which performs one retry.
 * ExponentialRetryStrategy which performs multiple retries with an exponential increase of duration between the attempts.
+* FibonacciRetryStragey which uses a baseline and increases it by the fibonacci serie.
 
 
 ```java
