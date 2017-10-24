@@ -19,6 +19,8 @@ public final class ExponentialRetryStrategy implements RetryStrategy {
 
     private static final Logger LOG = LoggerFactory.getLogger(ExponentialRetryStrategy.class);
 
+    private static final String FAILED_TASK = "Failed with task, performing retry attempt {}. Max attempt is {}.";
+
     private static final long DEFAULT_BASE = 10;
     private static final int DEFAULT_MAX_EXPONENT = 4;
 
@@ -52,6 +54,7 @@ public final class ExponentialRetryStrategy implements RetryStrategy {
                     task.run();
                     return;
                 } catch (RuntimeException e) {
+                    LOG.warn(FAILED_TASK, exponent+1, maxExponent);
 
                     if (exception != null) {
                         exception.addSuppressed(e);
@@ -85,6 +88,7 @@ public final class ExponentialRetryStrategy implements RetryStrategy {
                 try {
                     return Optional.ofNullable(task.get());
                 } catch (RuntimeException e) {
+                    LOG.warn(FAILED_TASK, exponent+1, maxExponent);
 
                     if (exception != null) {
                         exception.addSuppressed(e);

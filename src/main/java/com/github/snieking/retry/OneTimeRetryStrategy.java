@@ -46,7 +46,7 @@ public final class OneTimeRetryStrategy implements RetryStrategy {
             try {
                 runnable.run();
             } catch (RuntimeException e) {
-                LOG.info(FAILED_TASK);
+                LOG.warn(FAILED_TASK);
                 if (!nonRetryableExceptions.containsKey(e.getClass())) {
                     TimeManager.waitUntilDurationPassed(durationBeforeNextRetry);
                     runnable.run();
@@ -61,7 +61,7 @@ public final class OneTimeRetryStrategy implements RetryStrategy {
             try {
                 return Optional.ofNullable(task.get());
             } catch (RuntimeException e) {
-                LOG.info(FAILED_TASK);
+                LOG.warn(FAILED_TASK);
                 if (!nonRetryableExceptions.containsKey(e.getClass())) {
                     TimeManager.waitUntilDurationPassed(durationBeforeNextRetry);
                     return Optional.ofNullable(task.get());

@@ -14,6 +14,8 @@ public class FibonacciRetryStrategy implements RetryStrategy {
 
     private static final Logger LOG = LoggerFactory.getLogger(FibonacciRetryStrategy.class);
 
+    private static final String FAILED_TASK = "Failed with task, performing retry attempt {}. Max attempt is {}.";
+
     private static final int DEFAULT_MAX_FIB = 10;
     private static final long DEFAULT_OFFSET = 100;
 
@@ -52,6 +54,7 @@ public class FibonacciRetryStrategy implements RetryStrategy {
                     runnable.run();
                     return;
                 } catch (RuntimeException e) {
+                    LOG.warn(FAILED_TASK, currentFib, maxFib);
 
                     if (exception != null) {
                         exception.addSuppressed(e);
@@ -92,7 +95,7 @@ public class FibonacciRetryStrategy implements RetryStrategy {
                 try {
                     return Optional.ofNullable(task.get());
                 } catch (RuntimeException e) {
-
+                    LOG.warn(FAILED_TASK, currentFib, maxFib);
                     if (exception != null) {
                         exception.addSuppressed(e);
                     } else {
