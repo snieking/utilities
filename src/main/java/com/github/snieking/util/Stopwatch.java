@@ -35,6 +35,15 @@ public class Stopwatch {
     }
 
     /**
+     * Gets the time that passed during the start and stop of the stopwatch.
+     *
+     * @return time in milliseconds.
+     */
+    public long getTimeInMilliSeconds() {
+        return stop.toEpochMilli() - start.toEpochMilli();
+    }
+
+    /**
      * Starts a new stopwatch.
      *
      * @return the {@link Stopwatch} instance.
