@@ -28,7 +28,7 @@ import java.util.function.Supplier;
 
 /**
  * Performs an exponential retry strategy.
- * <p>
+ * 
  * For example, if base is 10ms and maxExponent is 5, it will perform retries after 10, 100, 1000 and 100000 milliseconds.
  */
 public final class ExponentialRetryStrategy implements RetryStrategy {
