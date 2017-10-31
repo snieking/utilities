@@ -1,3 +1,19 @@
+/*
+ * Copyright 2017 Viktor Plane
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.github.snieking.retry;
 
 import com.github.snieking.time.TimeManager;
@@ -12,7 +28,7 @@ import java.util.function.Supplier;
 
 /**
  * Performs an exponential retry strategy.
- *
+ * <p>
  * For example, if base is 10ms and maxExponent is 5, it will perform retries after 10, 100, 1000 and 100000 milliseconds.
  */
 public final class ExponentialRetryStrategy implements RetryStrategy {
@@ -54,7 +70,7 @@ public final class ExponentialRetryStrategy implements RetryStrategy {
                     task.run();
                     return;
                 } catch (RuntimeException e) {
-                    LOG.warn(FAILED_TASK, exponent+1, maxExponent);
+                    LOG.warn(FAILED_TASK, exponent + 1, maxExponent);
 
                     if (exception != null) {
                         exception.addSuppressed(e);
@@ -88,7 +104,7 @@ public final class ExponentialRetryStrategy implements RetryStrategy {
                 try {
                     return Optional.ofNullable(task.get());
                 } catch (RuntimeException e) {
-                    LOG.warn(FAILED_TASK, exponent+1, maxExponent);
+                    LOG.warn(FAILED_TASK, exponent + 1, maxExponent);
 
                     if (exception != null) {
                         exception.addSuppressed(e);
@@ -145,7 +161,7 @@ public final class ExponentialRetryStrategy implements RetryStrategy {
      * Creates an ExponentialRetryStrategy with a provided max exponent, and a base of a provided milliseconds.
      *
      * @param maxExponent the max exponent before giving up
-     * @param base the base that should be used.
+     * @param base        the base that should be used.
      * @return {@link ExponentialRetryStrategy}
      */
     public static ExponentialRetryStrategy createRetryStrategy(final int maxExponent, long base) {
