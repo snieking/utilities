@@ -66,7 +66,7 @@ public class ExponentialRetryStrategyTest extends BaseRetryStrategyTest {
 
     @Test(expected = IllegalStateException.class)
     public void testPermanentException() {
-        createRetryStrategy(3, 10)
+        createRetryStrategy(3, 5)
                 .perform(() -> {
                     throw new IllegalStateException();
                 });

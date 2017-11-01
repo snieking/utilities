@@ -17,6 +17,7 @@
 package com.github.snieking.retry;
 
 import com.github.snieking.time.TimeManager;
+import com.github.snieking.util.SanityChecker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,16 +32,17 @@ public class FibonacciRetryStrategy implements RetryStrategy {
     private static final Logger LOG = LoggerFactory.getLogger(FibonacciRetryStrategy.class);
 
     private static final String FAILED_TASK = "Failed with task, performing retry attempt {}. Max attempt is {}.";
+    private static final String BAD_ARGUMENTS = "Provided arguments can't be null";
 
     private static final int DEFAULT_MAX_FIB = 10;
-    private static final long DEFAULT_OFFSET = 100;
+    private static final double DEFAULT_OFFSET = 100;
 
     private Map<Class, Object> nonRetryableExceptions;
 
     private int maxFib;
-    private long offset;
+    private double offset;
 
-    private FibonacciRetryStrategy(int maxFib, long offset) {
+    private FibonacciRetryStrategy(int maxFib, double offset) {
         this.maxFib = maxFib;
         this.offset = offset;
         this.nonRetryableExceptions = new ConcurrentHashMap<>();
@@ -50,7 +52,7 @@ public class FibonacciRetryStrategy implements RetryStrategy {
     public FibonacciRetryStrategy nonRetryExceptions(Class... exceptions) {
         nonRetryableExceptions = new ConcurrentHashMap<>();
         for (Class exception : exceptions) {
-            nonRetryableExceptions.put(exception, Optional.empty());
+            nonRetryableExceptions.put(exception, new Object());
         }
 
         return this;
@@ -62,15 +64,15 @@ public class FibonacciRetryStrategy implements RetryStrategy {
             RuntimeException exception = null;
             int currentFib = 1;
 
-            long previousOffset = offset;
-            long currentOffset = offset;
+            double previousOffset = offset;
+            double currentOffset = offset;
 
             while (currentFib <= maxFib) {
                 try {
+                    LOG.trace("Attempt {} of running task", currentFib);
                     runnable.run();
                     return;
                 } catch (RuntimeException e) {
-                    LOG.warn(FAILED_TASK, currentFib, maxFib);
 
                     if (exception != null) {
                         exception.addSuppressed(e);
@@ -79,16 +81,16 @@ public class FibonacciRetryStrategy implements RetryStrategy {
                     }
 
                     if (!nonRetryableExceptions.containsKey(e.getClass())) {
-                        TimeManager.waitUntilDurationPassed(Duration.ofMillis(currentOffset));
+                        LOG.warn(FAILED_TASK, currentFib++, maxFib);
+                        TimeManager.waitUntilDurationPassed(Duration.ofMillis((int) currentOffset));
 
-                        long temp = currentOffset;
+                        double temp = currentOffset;
                         currentOffset += previousOffset;
                         previousOffset = temp;
                     } else {
                         break;
                     }
 
-                    currentFib++;
                 }
             }
 
@@ -104,14 +106,15 @@ public class FibonacciRetryStrategy implements RetryStrategy {
             RuntimeException exception = null;
             int currentFib = 1;
 
-            long previousOffset = offset;
-            long currentOffset = offset;
+            double previousOffset = offset;
+            double currentOffset = offset;
 
             while (currentFib <= maxFib) {
                 try {
+                    LOG.trace("Attempt {} of running task", currentFib);
                     return Optional.ofNullable(task.get());
                 } catch (RuntimeException e) {
-                    LOG.warn(FAILED_TASK, currentFib, maxFib);
+
                     if (exception != null) {
                         exception.addSuppressed(e);
                     } else {
@@ -119,16 +122,15 @@ public class FibonacciRetryStrategy implements RetryStrategy {
                     }
 
                     if (!nonRetryableExceptions.containsKey(e.getClass())) {
-                        TimeManager.waitUntilDurationPassed(Duration.ofMillis(currentOffset));
+                        LOG.warn(FAILED_TASK, currentFib++, maxFib);
+                        TimeManager.waitUntilDurationPassed(Duration.ofMillis((int) currentOffset));
 
-                        long temp = currentOffset;
+                        double temp = currentOffset;
                         currentOffset += previousOffset;
                         previousOffset = temp;
                     } else {
                         break;
                     }
-
-                    currentFib++;
                 }
             }
 
@@ -155,7 +157,8 @@ public class FibonacciRetryStrategy implements RetryStrategy {
      * @param maxFib the maxFib that it will iterate to. Can also be looked at as maxRetries.
      * @return {@link FibonacciRetryStrategy} instance.
      */
-    public static FibonacciRetryStrategy createRetryStrategy(int maxFib) {
+    public static FibonacciRetryStrategy createRetryStrategy(final Integer maxFib) {
+        SanityChecker.verifyNoObjectIsNull(BAD_ARGUMENTS, maxFib);
         return new FibonacciRetryStrategy(maxFib, DEFAULT_OFFSET);
     }
 
@@ -165,7 +168,11 @@ public class FibonacciRetryStrategy implements RetryStrategy {
      * @param offset decides what the start of fib will be. For example 100: 100 + 100 + 200 + 400.
      * @return {@link FibonacciRetryStrategy} instance.
      */
-    public static FibonacciRetryStrategy createRetryStrategy(long offset) {
+    public static FibonacciRetryStrategy createRetryStrategy(final double offset) {
+        if (offset <= 0) {
+            throw new IllegalArgumentException(BAD_ARGUMENTS);
+        }
+
         return new FibonacciRetryStrategy(DEFAULT_MAX_FIB, offset);
     }
 
@@ -176,7 +183,11 @@ public class FibonacciRetryStrategy implements RetryStrategy {
      * @param offset decides what the start of fib will be. For example 100: 100 + 100 + 200 + 400.
      * @return {@link FibonacciRetryStrategy} instance.
      */
-    public static FibonacciRetryStrategy createRetryStrategy(int maxFib, long offset) {
+    public static FibonacciRetryStrategy createRetryStrategy(final int maxFib, final double offset) {
+        if (maxFib <= 0 && offset <= 0) {
+            throw new IllegalArgumentException(BAD_ARGUMENTS);
+        }
+
         return new FibonacciRetryStrategy(maxFib, offset);
     }
 }

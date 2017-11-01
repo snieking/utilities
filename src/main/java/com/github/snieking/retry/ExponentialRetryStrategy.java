@@ -17,6 +17,7 @@
 package com.github.snieking.retry;
 
 import com.github.snieking.time.TimeManager;
+import com.github.snieking.util.SanityChecker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +29,7 @@ import java.util.function.Supplier;
 
 /**
  * Performs an exponential retry strategy.
- * 
+ *
  * For example, if base is 10ms and maxExponent is 5, it will perform retries after 10, 100, 1000 and 100000 milliseconds.
  */
 public final class ExponentialRetryStrategy implements RetryStrategy {
@@ -36,15 +37,16 @@ public final class ExponentialRetryStrategy implements RetryStrategy {
     private static final Logger LOG = LoggerFactory.getLogger(ExponentialRetryStrategy.class);
 
     private static final String FAILED_TASK = "Failed with task, performing retry attempt {}. Max attempt is {}.";
+    private static final String BAD_ARGUMENTS = "Provided arguments can't be null";
 
-    private static final long DEFAULT_BASE = 10;
+    private static final double DEFAULT_BASE = 10;
     private static final int DEFAULT_MAX_EXPONENT = 4;
 
     private int maxExponent;
-    private long base;
+    private double base;
     private Map<Class, Object> nonRetryableExceptions;
 
-    private ExponentialRetryStrategy(final int maxExponent, final long base) {
+    private ExponentialRetryStrategy(final int maxExponent, final double base) {
         this.maxExponent = maxExponent;
         this.base = base;
         this.nonRetryableExceptions = new ConcurrentHashMap<>();
@@ -54,7 +56,7 @@ public final class ExponentialRetryStrategy implements RetryStrategy {
     public ExponentialRetryStrategy nonRetryExceptions(Class... exceptions) {
         this.nonRetryableExceptions = new ConcurrentHashMap<>();
         for (Class exception : exceptions) {
-            nonRetryableExceptions.put(exception, Optional.empty());
+            nonRetryableExceptions.put(exception, new Object());
         }
         return this;
     }
@@ -65,20 +67,21 @@ public final class ExponentialRetryStrategy implements RetryStrategy {
         if (task != null) {
             int exponent = 0;
 
-            while (exponent <= maxExponent) {
+            while (exponent < maxExponent) {
                 try {
+                    LOG.trace("Attempt {} of running task", exponent+1);
                     task.run();
                     return;
                 } catch (RuntimeException e) {
-                    LOG.warn(FAILED_TASK, exponent + 1, maxExponent);
 
                     if (exception != null) {
                         exception.addSuppressed(e);
                     } else {
                         exception = e;
                     }
-                    exponent++;
+
                     if (!nonRetryableExceptions.containsKey(e.getClass())) {
+                        LOG.warn(FAILED_TASK, exponent++, maxExponent);
                         TimeManager.waitUntilDurationPassed(Duration.ofMillis((long) Math.pow(base, exponent++)));
                     } else {
                         break;
@@ -102,17 +105,18 @@ public final class ExponentialRetryStrategy implements RetryStrategy {
 
             while (exponent <= maxExponent) {
                 try {
+                    LOG.trace("Attempt {} of running task", exponent);
                     return Optional.ofNullable(task.get());
                 } catch (RuntimeException e) {
-                    LOG.warn(FAILED_TASK, exponent + 1, maxExponent);
 
                     if (exception != null) {
                         exception.addSuppressed(e);
                     } else {
                         exception = e;
                     }
-                    exponent++;
+
                     if (!nonRetryableExceptions.containsKey(e.getClass())) {
+                        LOG.warn(FAILED_TASK, exponent++, maxExponent);
                         TimeManager.waitUntilDurationPassed(Duration.ofMillis((long) Math.pow(base, exponent++)));
                     } else {
                         break;
@@ -129,7 +133,7 @@ public final class ExponentialRetryStrategy implements RetryStrategy {
     }
 
     /**
-     * Creates a ExpontentialRetryer with a default max exponent of 4, and a default base of 10 milliseconds.
+     * Creates an ExpontentialRetryer with a default max exponent of 4, and a default base of 10 milliseconds.
      *
      * @return {@link ExponentialRetryStrategy}
      */
@@ -138,12 +142,13 @@ public final class ExponentialRetryStrategy implements RetryStrategy {
     }
 
     /**
-     * Creates a ExponentialRetryStrategy with a provided max exponent, and a default base of 10 milliseconds.
+     * Creates an ExponentialRetryStrategy with a provided max exponent, and a default base of 10 milliseconds.
      *
      * @param maxExponent the max exponent before giving up
      * @return {@link ExponentialRetryStrategy}
      */
-    public static ExponentialRetryStrategy createRetryStrategy(final int maxExponent) {
+    public static ExponentialRetryStrategy createRetryStrategy(final Integer maxExponent) {
+        SanityChecker.verifyNoObjectIsNull(BAD_ARGUMENTS, maxExponent);
         return new ExponentialRetryStrategy(maxExponent, DEFAULT_BASE);
     }
 
@@ -153,7 +158,11 @@ public final class ExponentialRetryStrategy implements RetryStrategy {
      * @param base the base that should be used.
      * @return {@link ExponentialRetryStrategy}
      */
-    public static ExponentialRetryStrategy createRetryStrategy(final long base) {
+    public static ExponentialRetryStrategy createRetryStrategy(final double base) {
+        if (base <= 0) {
+            throw new IllegalArgumentException(BAD_ARGUMENTS);
+        }
+
         return new ExponentialRetryStrategy(DEFAULT_MAX_EXPONENT, base);
     }
 
@@ -164,7 +173,11 @@ public final class ExponentialRetryStrategy implements RetryStrategy {
      * @param base        the base that should be used.
      * @return {@link ExponentialRetryStrategy}
      */
-    public static ExponentialRetryStrategy createRetryStrategy(final int maxExponent, long base) {
+    public static ExponentialRetryStrategy createRetryStrategy(final int maxExponent, final double base) {
+        if (maxExponent <= 0 || base <= 0) {
+            throw new IllegalArgumentException(BAD_ARGUMENTS);
+        }
+
         return new ExponentialRetryStrategy(maxExponent, base);
     }
 

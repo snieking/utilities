@@ -51,7 +51,7 @@ public final class OneTimeRetryStrategy implements RetryStrategy {
     public OneTimeRetryStrategy nonRetryExceptions(final Class... exceptions) {
         this.nonRetryableExceptions = new ConcurrentHashMap<>();
         for (Class e : exceptions) {
-            nonRetryableExceptions.put(e, Optional.empty());
+            nonRetryableExceptions.put(e, new Object());
         }
         return this;
     }
