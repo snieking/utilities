@@ -10,7 +10,7 @@
 
     <groupId>com.github.snieking</groupId>
     <artifactId>utilities</artifactId>
-    <version>1.1.4</version>
+    <version>1.1.5-SNAPSHOT</version>
     <name>com.github.snieking:utilities</name>
     <description>Various utilities for Java 8 development, such as retry mechanisms, time management and more</description>
 
