@@ -32,6 +32,11 @@ Optional<Person> person = retryStrategy
 ```
 
 ```java
+// Build a BasicRetryStrategy which takes an int of maxAttempts and a duration between each retry.
+RetryStrategy retryStrategy = BasicRetryStrategy.create(Duration.ofSeconds(5), 10);
+```
+
+```java
 // Build an ExponentialRetryStrategy which takes an int maxExponent and long base.
 // The maxExponent specifies the max value of n in b^n.
 // The base specifies the base in milliseconds to wait before retrying.
